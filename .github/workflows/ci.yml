@@ -3,10 +3,11 @@ name: CI - Configure, Build, Test
 on:
   push:
     branches: [ main ]
+    tags:
+    - 'v*'
   pull_request:
     branches: [ main ]
-  tags:
-    - 'v*'    
+  
   workflow_dispatch:
 
 jobs:
@@ -14,7 +15,7 @@ jobs:
     strategy:
       matrix:
         runs-on: [self-ubuntu-24.04, karolina]
-
+        #nps: [1,2,4]
     runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout Repository
@@ -22,38 +23,38 @@ jobs:
 
       - name: Configure the Build System
         run: |
-            if [ "${{ matrix.runs-on }}" == "karolina" ]; then
-                module load Boost/1.83.0-GCC-13.2.0 Ninja/1.12.1-GCCcore-13.3.0 OpenMPI/4.1.6-GCC-13.2.0
-            fi
-            cmake --preset default
-            tree
+          if [ "${{ matrix.runs-on }}" == "karolina" ]; then
+            module load Boost/1.83.0-GCC-13.2.0 Ninja/1.12.1-GCCcore-13.3.0 OpenMPI/4.1.6-GCC-13.2.0
+          fi
+          cmake --preset default
+          tree
 
       - name: Build the Project
         run: |
           if [ "${{ matrix.runs-on }}" == "karolina" ]; then
-               module load Boost/1.83.0-GCC-13.2.0 Ninja/1.12.1-GCCcore-13.3.0 OpenMPI/4.1.6-GCC-13.2.0
+            module load Boost/1.83.0-GCC-13.2.0 Ninja/1.12.1-GCCcore-13.3.0 OpenMPI/4.1.6-GCC-13.2.0
           fi
           cmake --build --preset default
-#          mpirun -np ${{ matrix.nps }} build/default/myapp/myapp
+          #mpirun -np ${{ matrix.nps }} build/default/myapp/myapp
 
       - name: Run Tests
         run: |
           if [ "${{ matrix.runs-on }}" == "karolina" ]; then
-               module load Boost/1.83.0-GCC-13.2.0 OpenMPI/4.1.6-GCC-13.2.0
+            module load Boost/1.83.0-GCC-13.2.0 OpenMPI/4.1.6-GCC-13.2.0
           fi
           ctest --preset default
 
       - name: Package the Application
         run: |
           if [ "${{ matrix.runs-on }}" == "karolina" ]; then
-               module load Boost/1.83.0-GCC-13.2.0 OpenMPI/4.1.6-GCC-13.2.0
+            module load Boost/1.83.0-GCC-13.2.0 OpenMPI/4.1.6-GCC-13.2.0
           fi
           cmake --build --preset default -t package
 
-      - name: Upload tarball
+      - name: Upload tarball                  
         uses: actions/upload-artifact@v4
         with:
-          name: archive-${{ matrix.runs-on }}-np${{ matrix.nps }}
+          name: archive-${{ matrix.runs-on }}
           path: |
             build/default/*.tar.gz
             LICENSE
@@ -70,7 +71,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       -
-        name: Docker metadata
+        name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
