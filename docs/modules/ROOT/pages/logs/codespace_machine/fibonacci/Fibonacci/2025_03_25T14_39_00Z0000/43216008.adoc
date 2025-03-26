@@ -1,0 +1,23 @@
+= ReFrame logs
+
+== ReFrame scheduler script
+
+[source,bash]
+----
+#!/bin/bash
+python /workspaces/202503-c3b-bouaziz14/examples/fibonacci.py -n 35 -a recursive -o /workspaces/202503-c3b-bouaziz14/outputs/fibo/output.json
+
+----
+
+
+== ReFrame output log
+
+[source,bash]
+----
+Elapsed time: 1.0243849099999807
+Fibonacci number: 9227465
+Done!
+
+----
+
+
